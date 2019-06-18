@@ -48,7 +48,7 @@ body {
 **********************************************/
 
 .player-name {
-  font-size: 40px;
+  font-size: 35px;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -180,6 +180,9 @@ i {
 .btn-hold {
   top: 467px;
 }
+.btn-leaderboard {
+  top: 520px;
+}
 
 .dice-block {
   position: absolute;
@@ -199,4 +202,32 @@ i {
 .winner .player-name {
   font-weight: 300;
   color: #eb4d4d;
+}
+
+/* Modal Content */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 30px;
+  text-align: center;
+  border: 1px solid #888;
+  width: 50%;
+}
+
+ol {
+    text-align: left;
 }

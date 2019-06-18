@@ -10,35 +10,59 @@ let gameLimitValue = 0;
 let firstPlayer;
 let secondPlayer;
 
-function Gamer(name) {
+function Gamer(name, score) {
   this.name = name;
-  this.score = 0
+  this.score = score || 0;
 }
 
-Gamer.prototype.getScore = function() {
+Gamer.prototype.getScore = function () {
   return this.score
-} 
-Gamer.prototype.setScore = function() {
+}
+Gamer.prototype.setScore = function () {
   return this.score++
-} 
-Gamer.prototype.resetScore = function() {
+}
+Gamer.prototype.resetScore = function () {
   return this.score = 0
-} 
+}
+
+const initPlayer = () => {
+  let name = prompt('What is your name?', 'Player');
+
+  if (name === null) {
+    name = 'Player#' + Math.floor(Math.random() * 100);
+  }
+
+  if (localStorage.getItem(name) !== null) {
+    let isPlayer = confirm(`${name} is you?`);
+
+    if (!isPlayer) {
+      name = name + '#' + Math.floor(Math.random() * 100);
+      return new Gamer(name);
+    } else {
+      return new Gamer(name, localStorage.getItem(name));
+    }
+  }
+  return new Gamer(name);
+}
+
+const disabledButton = () => {
+  document.querySelector('.btn-roll').toggleAttribute('disabled')
+  document.querySelector('.btn-hold').toggleAttribute('disabled')
+}
 
 const initGame = () => {
-  firstPlayer = new Gamer(prompt('What is your name?', 'Player1'))
-  secondPlayer = new Gamer(prompt('What is your name?', 'Player2'))
+  firstPlayer = initPlayer();
+  secondPlayer = initPlayer();
   document.querySelector('#name-0').textContent = firstPlayer.name;
   document.querySelector('#name-1').textContent = secondPlayer.name;
   document.querySelector('#current-0').textContent = 0;
   document.querySelector('#current-1').textContent = 0;
   document.querySelector('#score-0').textContent = 0;
   document.querySelector('#score-1').textContent = 0;
-  document.querySelector('.btn-roll').removeAttribute('disabled')
-  document.querySelector('.btn-hold').removeAttribute('disabled')
   gameLimitValue = parseInt(document.querySelector('input').value);
   firstDiceElement.style.display = 'none';
   secondDiceElement.style.display = 'none';
+  disabledButton();
 
   if (isNaN(gameLimitValue)) {
     gameLimitValue = GAME_LIMIT;
@@ -46,7 +70,7 @@ const initGame = () => {
 }
 
 // Roll button
-document.querySelector('.btn-roll').addEventListener('click', function() {
+document.querySelector('.btn-roll').addEventListener('click', function () {
   let firstDice = Math.floor(Math.random() * 6) + 1;
   let secondDice = Math.floor(Math.random() * 6) + 1;
   let diceSum = firstDice + secondDice;
@@ -59,17 +83,21 @@ document.querySelector('.btn-roll').addEventListener('click', function() {
 
   if (firstDice !== RESET_VALUE && secondDice !== RESET_VALUE && firstDice !== secondDice) {
     current += diceSum;
-    document.getElementById('current-'+activePlayer).textContent = current;
+    document.getElementById('current-' + activePlayer).textContent = current;
 
     if (scores[activePlayer] + current >= gameLimitValue) {
       if (activePlayer === 0) {
         firstPlayer.setScore();
+        localStorage.setItem(firstPlayer.name, firstPlayer.score);
+        disabledButton();
+        alert(`${firstPlayer.name} won!!!!!!!!`);
       } else {
         secondPlayer.setScore();
+        localStorage.setItem(secondPlayer.name, secondPlayer.score);
+        disabledButton();
+        alert(`${secondPlayer.name} won!!!!!!!!`);
       }
-
-      alert(`Player ${activePlayer} won!!!`);
-    } 
+    }
   } else {
     changePlayer();
   }
@@ -77,7 +105,7 @@ document.querySelector('.btn-roll').addEventListener('click', function() {
 
 const changePlayer = () => {
   current = 0;
-  document.getElementById('current-'+activePlayer).textContent = 0;
+  document.getElementById('current-' + activePlayer).textContent = 0;
   document.querySelector(`.player-${activePlayer}-panel`).classList.toggle('active');
   activePlayer = +!activePlayer;
   firstDiceElement.style.display = 'none';
@@ -86,13 +114,65 @@ const changePlayer = () => {
 }
 
 // Save button
-document.querySelector('.btn-hold').addEventListener('click', function() {
+document.querySelector('.btn-hold').addEventListener('click', function () {
   scores[activePlayer] += current;
   document.querySelector(`#score-${activePlayer}`).textContent = scores[activePlayer];
   changePlayer();
 });
 
 // New game button
-document.querySelector('.btn-new').addEventListener('click', function() {
+document.querySelector('.btn-new').addEventListener('click', function () {
+  if (scores[activePlayer] < gameLimitValue) {
+    disabledButton();
+  }
   initGame();
-});
+;});
+
+const sortResult = () => {
+  let sortable = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    let key = localStorage.key(i);
+    let value = localStorage.getItem(key);
+    sortable.push([key, value]);
+  }
+
+  sortable.sort(function (a, b) {
+    return b[1] - a[1];
+  });
+  
+  return sortable;
+}
+
+// Get result from localStorage
+const getResult = () => {
+  let ol = document.createElement('ol');
+  let sortableResult = sortResult();
+
+  sortableResult.forEach(element => {
+    let li = document.createElement('li');
+    li.textContent = `${element[0]}: ${element[1]}`;
+    ol.appendChild(li);
+  });
+
+  document.querySelector('.modal-content').appendChild(ol);
+}
+
+// Modal for result
+let modal = document.querySelector('#myModal');
+let btn = document.querySelector('.btn-leaderboard');
+let span = document.querySelector('.close');
+
+btn.onclick = function () {
+  getResult();
+  modal.style.display = 'block';
+}
+
+span.onclick = function () {
+  modal.style.display = 'none';
+}
+
+window.onclick = function (event) {
+  if (event.target == modal) {
+    modal.style.display = 'none';
+  }
+}
