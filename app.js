@@ -7,8 +7,29 @@ let scores = [0, 0];
 let activePlayer = 0;
 let current = 0;
 let gameLimitValue = 0;
+let firstPlayer;
+let secondPlayer;
+
+function Gamer(name) {
+  this.name = name;
+  this.score = 0
+}
+
+Gamer.prototype.getScore = function() {
+  return this.score
+} 
+Gamer.prototype.setScore = function() {
+  return this.score++
+} 
+Gamer.prototype.resetScore = function() {
+  return this.score = 0
+} 
 
 const initGame = () => {
+  firstPlayer = new Gamer(prompt('What is your name?', 'Player1'))
+  secondPlayer = new Gamer(prompt('What is your name?', 'Player2'))
+  document.querySelector('#name-0').textContent = firstPlayer.name;
+  document.querySelector('#name-1').textContent = secondPlayer.name;
   document.querySelector('#current-0').textContent = 0;
   document.querySelector('#current-1').textContent = 0;
   document.querySelector('#score-0').textContent = 0;
@@ -24,6 +45,7 @@ const initGame = () => {
   }
 }
 
+// Roll button
 document.querySelector('.btn-roll').addEventListener('click', function() {
   let firstDice = Math.floor(Math.random() * 6) + 1;
   let secondDice = Math.floor(Math.random() * 6) + 1;
@@ -40,6 +62,12 @@ document.querySelector('.btn-roll').addEventListener('click', function() {
     document.getElementById('current-'+activePlayer).textContent = current;
 
     if (scores[activePlayer] + current >= gameLimitValue) {
+      if (activePlayer === 0) {
+        firstPlayer.setScore();
+      } else {
+        secondPlayer.setScore();
+      }
+
       alert(`Player ${activePlayer} won!!!`);
     } 
   } else {
@@ -57,12 +85,14 @@ const changePlayer = () => {
   document.querySelector(`.player-${activePlayer}-panel`).classList.toggle('active');
 }
 
+// Save button
 document.querySelector('.btn-hold').addEventListener('click', function() {
   scores[activePlayer] += current;
   document.querySelector(`#score-${activePlayer}`).textContent = scores[activePlayer];
   changePlayer();
 });
 
+// New game button
 document.querySelector('.btn-new').addEventListener('click', function() {
   initGame();
 });
